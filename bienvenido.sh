@@ -12,10 +12,10 @@ Sub="-254/24"
 Range=$Gateway$Sub
 while true ; do
 
-    echo $ciclo
+    echo "ciclo: " $ciclo
     if [ $ciclo -ne 100 ] && [ ! -z "$ip" ]; then
         echo $ip
-        ping -c2 -i 0.2 $ip &> /dev/null
+        ping -c2 -i 0.4 $ip &> /dev/null
         if [ $? -eq 0 ]; then
             echo 'conectado'
             encontrado=true
@@ -27,20 +27,20 @@ while true ; do
                     play jorge.flac
                 fi
                 sonar=false
-                sleep 5
-            else
-                sleep 2
             fi
+            sleep 10
         else
             echo 'desconectado'
             encontrado=false
         fi
         ((ciclo++))
+    #si no se detecto la ip de la mac o si ya pasaron 100 pruebas con la ip y verifica que no cambio
     else
         ciclo=0
         #obtenemos los datos con nmap, no siempre obtiene todas las conexiones...
         echo 'Obteniendo informacion de la red'
         sudo nmap -sPn $Range > listnmap
+        cat listnmap
         echo 'Generando la lista de macs'
         cat listnmap | grep 'MAC Address' | awk '{print $3}' > macslist
         echo 'verificando si esta conectado...'
