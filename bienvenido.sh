@@ -6,10 +6,11 @@ sonar=true
 ciclo=0
 
 #verifica que haya una mac y archivo de sonido en el archivo
-touch macaddress
+echo "Verificando archivo de configuracion..."
+touch conf
 while true; do
-    mac="$(cat macaddress | cut -d' ' -f1)"
-    sonido="$(cat macaddress | cut -d' ' -f2)"
+    mac="$(more conf | cut -d' ' -f1)"
+    sonido="$(more conf | cut -d' ' -f2)"
     if [ ! -z "$mac" ] && [ ! -z "$sonido" ]; then
         break
     else
@@ -19,16 +20,22 @@ while true; do
         sleep 20
     fi
 done
+more conf
+
+#para iterar si hay mas de una mas y sonido
+#for i in "${macs[@]}"; do echo "$i"; done
 
 #Determinando el gateway para definir el rango
+echo "Detectando gateway..."
 Gateway="$(ip route | awk '/default/ { print $3 }')"
 Sub="-254/24"
 Range=$Gateway$Sub
+echo $Gateway
 while true ; do
 
     echo "ciclo: " $ciclo
     if [ $ciclo -ne 1000 ] && [ ! -z "$ip" ]; then
-        echo $ip
+        echo "ping "$ip
         ping -c2 -i 0.4 $ip &> /dev/null
         if [ $? -eq 0 ]; then
             echo 'conectado'
