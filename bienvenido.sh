@@ -1,10 +1,24 @@
 #!/bin/bash
 
-#mac='08:EC:A9:23:22:60'
-mac="$(cat macaddress)"
+#inicio de variables
 encontrado=false
 sonar=true
 ciclo=0
+
+#verifica que haya una mac y archivo de sonido en el archivo
+touch macaddress
+while true; do
+    mac="$(cat macaddress | cut -d' ' -f1)"
+    sonido="$(cat macaddress | cut -d' ' -f2)"
+    if [ ! -z "$mac" ] && [ ! -z "$sonido" ]; then
+        break
+    else
+        echo "coloque el nro de mac en el archivo macaddress y el archivo de sonido"
+        echo "forma: "
+        echo "06:EC:C9:23:24:60 saludo.flac"
+        sleep 20
+    fi
+done
 
 #Determinando el gateway para definir el rango
 Gateway="$(ip route | awk '/default/ { print $3 }')"
@@ -13,7 +27,7 @@ Range=$Gateway$Sub
 while true ; do
 
     echo "ciclo: " $ciclo
-    if [ $ciclo -ne 100 ] && [ ! -z "$ip" ]; then
+    if [ $ciclo -ne 1000 ] && [ ! -z "$ip" ]; then
         echo $ip
         ping -c2 -i 0.4 $ip &> /dev/null
         if [ $? -eq 0 ]; then
@@ -22,9 +36,9 @@ while true ; do
             #esto es para que suene solo una ves cuando se conecta
             if [ "$sonar" = true ];then
                 if hash mplayer 2>/dev/null; then
-                    mplayer jorge.flac
+                    mplayer $sonido
                 else
-                    play jorge.flac
+                    play $sonido
                 fi
                 sonar=false
             fi
@@ -34,7 +48,7 @@ while true ; do
             encontrado=false
         fi
         ((ciclo++))
-    #si no se detecto la ip de la mac o si ya pasaron 100 pruebas con la ip y verifica que no cambio
+    #si no se detecto la ip de la mac o si ya pasaron 1000 pruebas con la ip y verifica que no cambio
     else
         ciclo=0
         #obtenemos los datos con nmap, no siempre obtiene todas las conexiones...
@@ -56,9 +70,9 @@ while true ; do
                 #esto es para que suene solo una ves cuando se conecta
                 if [ "$sonar" = true ];then
                     if hash mplayer 2>/dev/null; then
-                        mplayer jorge.flac
+                        mplayer $sonido
                     else
-                        play jorge.flac
+                        play $sonido
                     fi
                     sonar=false
                     sleep 5
